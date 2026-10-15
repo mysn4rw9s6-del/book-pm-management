@@ -6,11 +6,9 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import Paper from '@mui/material/Paper';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 import StarIcon from '@mui/icons-material/Star';
 import { tokens } from '../theme';
@@ -47,8 +45,25 @@ const CATEGORIES = {
 const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
-// Hours the Tait McKenzie Fitness Centre is open: 6 AM – 11 PM
-const HOURS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
+// Fall 2026 Tait McKenzie Fitness Centre hours (effective Sep 8, 2026).
+// Source: York University Athletics (@yorkulions), Sep 5 2026 Instagram post.
+//   Mon–Fri: 7 AM – 10 PM | Sat: 9 AM – 9 PM | Sun: 9 AM – 4 PM
+const HOURS_BY_DAY = {
+  mon: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+  tue: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+  wed: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+  thu: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+  fri: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+  sat: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+  sun: [9, 10, 11, 12, 13, 14, 15],
+};
+
+function buildDay(dayKey, overrideFn) {
+  return HOURS_BY_DAY[dayKey].map((h) => ({
+    hour: h,
+    occupancy: overrideFn ? overrideFn(h) : occupancyFor(dayKey, h),
+  }));
+}
 
 function formatHour(h) {
   const period = h >= 12 ? 'PM' : 'AM';
@@ -89,13 +104,13 @@ const TEST_STATES = [
     description: 'Valid recent data for every day. Hourly forecasts show Low / Medium / High.',
     dataAgeHours: 3,
     days: {
-      mon: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('mon', h) })),
-      tue: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('tue', h) })),
-      wed: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('wed', h) })),
-      thu: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('thu', h) })),
-      fri: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('fri', h) })),
-      sat: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sat', h) })),
-      sun: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sun', h) })),
+      mon: buildDay('mon'),
+      tue: buildDay('tue'),
+      wed: buildDay('wed'),
+      thu: buildDay('thu'),
+      fri: buildDay('fri'),
+      sat: buildDay('sat'),
+      sun: buildDay('sun'),
     },
   },
   {
@@ -104,13 +119,13 @@ const TEST_STATES = [
     description: 'Multiple slots share the lowest crowd level — all are highlighted.',
     dataAgeHours: 2,
     days: {
-      mon: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('mon', h) })),
-      tue: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('tue', h) })),
-      wed: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('wed', h) })),
-      thu: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('thu', h) })),
-      fri: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('fri', h) })),
-      sat: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sat', h) })),
-      sun: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sun', h) })),
+      mon: buildDay('mon'),
+      tue: buildDay('tue'),
+      wed: buildDay('wed'),
+      thu: buildDay('thu'),
+      fri: buildDay('fri'),
+      sat: buildDay('sat'),
+      sun: buildDay('sun'),
     },
   },
   {
@@ -119,13 +134,13 @@ const TEST_STATES = [
     description: 'Select a different day — forecast and highlighted slots both refresh.',
     dataAgeHours: 4,
     days: {
-      mon: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('mon', h) })),
-      tue: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('tue', h) })),
-      wed: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('wed', h) })),
-      thu: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('thu', h) })),
-      fri: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('fri', h) })),
-      sat: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sat', h) })),
-      sun: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sun', h) })),
+      mon: buildDay('mon'),
+      tue: buildDay('tue'),
+      wed: buildDay('wed'),
+      thu: buildDay('thu'),
+      fri: buildDay('fri'),
+      sat: buildDay('sat'),
+      sun: buildDay('sun'),
     },
   },
   {
@@ -134,13 +149,13 @@ const TEST_STATES = [
     description: 'No occupancy data available for the selected day. Shows "Forecast unavailable."',
     dataAgeHours: 1,
     days: {
-      mon: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('mon', h) })),
+      mon: buildDay('mon'),
       tue: null,
-      wed: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('wed', h) })),
-      thu: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('thu', h) })),
-      fri: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('fri', h) })),
-      sat: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sat', h) })),
-      sun: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sun', h) })),
+      wed: buildDay('wed'),
+      thu: buildDay('thu'),
+      fri: buildDay('fri'),
+      sat: buildDay('sat'),
+      sun: buildDay('sun'),
     },
   },
   {
@@ -149,13 +164,13 @@ const TEST_STATES = [
     description: 'Data is older than 24 hours. Guardrail fires — shows "Forecast unavailable."',
     dataAgeHours: 30,
     days: {
-      mon: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('mon', h) })),
-      tue: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('tue', h) })),
-      wed: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('wed', h) })),
-      thu: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('thu', h) })),
-      fri: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('fri', h) })),
-      sat: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sat', h) })),
-      sun: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sun', h) })),
+      mon: buildDay('mon'),
+      tue: buildDay('tue'),
+      wed: buildDay('wed'),
+      thu: buildDay('thu'),
+      fri: buildDay('fri'),
+      sat: buildDay('sat'),
+      sun: buildDay('sun'),
     },
   },
   {
@@ -164,13 +179,13 @@ const TEST_STATES = [
     description: 'Some slots have negative occupancy. Guardrail fires — shows "Forecast unavailable."',
     dataAgeHours: 2,
     days: {
-      mon: HOURS.map((h) => ({ hour: h, occupancy: h === 8 || h === 9 ? -5 : occupancyFor('mon', h) })),
-      tue: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('tue', h) })),
-      wed: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('wed', h) })),
-      thu: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('thu', h) })),
-      fri: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('fri', h) })),
-      sat: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sat', h) })),
-      sun: HOURS.map((h) => ({ hour: h, occupancy: occupancyFor('sun', h) })),
+      mon: buildDay('mon', (h) => (h === 8 || h === 9 ? -5 : occupancyFor('mon', h))),
+      tue: buildDay('tue'),
+      wed: buildDay('wed'),
+      thu: buildDay('thu'),
+      fri: buildDay('fri'),
+      sat: buildDay('sat'),
+      sun: buildDay('sun'),
     },
   },
 ];
