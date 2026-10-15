@@ -248,14 +248,19 @@ function buildForecast(dayData, dataAgeHours) {
     category: categoryForOccupancy(slot.occupancy),
   }));
 
+  // Check whether every slot shares the same category.
+  const categories = new Set(slots.map((s) => s.category));
+  const allEqual = categories.size === 1;
+
   // Find the lowest category across all slots for the selected day.
-  // All slots tied at that level get highlighted.
+  // All slots tied at that level get highlighted — unless every slot is
+  // the same category, in which case no slot is comparatively quieter.
   const categoryRank = { low: 0, medium: 1, high: 2 };
   const minRank = Math.min(...slots.map((s) => categoryRank[s.category]));
   const minCategory = Object.keys(categoryRank).find((k) => categoryRank[k] === minRank);
-  const quietSlots = slots.filter((s) => s.category === minCategory);
+  const quietSlots = allEqual ? [] : slots.filter((s) => s.category === minCategory);
 
-  return { available: true, slots, minCategory, quietSlots };
+  return { available: true, slots, minCategory, quietSlots, allEqual };
 }
 
 // ---------------------------------------------------------------------------
@@ -347,20 +352,36 @@ export default function CrowdForecast() {
       {/* Forecast */}
       {forecast.available ? (
         <>
-          {/* Quietest time summary */}
-          <Card id="quiet-summary" sx={{ mb: 2, borderColor: CATEGORIES[forecast.minCategory].border }}>
-            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 2 }}>
-              <StarIcon sx={{ color: CATEGORIES[forecast.minCategory].color, fontSize: 24 }} />
-              <Box>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                  Best time{forecast.quietSlots.length > 1 ? 's' : ''} to visit
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  {forecast.quietSlots.map((s) => formatHour(s.hour)).join(', ')}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
+          {/* Summary card — best times or no-quieter-time notice */}
+          {forecast.allEqual ? (
+            <Card id="quiet-summary" sx={{ mb: 2, borderColor: 'divider' }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 2 }}>
+                <TrendingFlatIcon sx={{ color: 'text.secondary', fontSize: 24 }} />
+                <Box>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                    No quieter time identified
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    All available hours are predicted to have {CATEGORIES[forecast.minCategory].label} crowd levels.
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card id="quiet-summary" sx={{ mb: 2, borderColor: CATEGORIES[forecast.minCategory].border }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 2 }}>
+                <StarIcon sx={{ color: CATEGORIES[forecast.minCategory].color, fontSize: 24 }} />
+                <Box>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                    Best time{forecast.quietSlots.length > 1 ? 's' : ''} to visit
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    {forecast.quietSlots.map((s) => formatHour(s.hour)).join(', ')}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Hourly forecast list */}
           <Card id="forecast-list">
@@ -368,7 +389,7 @@ export default function CrowdForecast() {
               {forecast.slots.map((slot, idx) => {
                 const cat = CATEGORIES[slot.category];
                 const Icon = cat.icon;
-                const isQuiet = slot.category === forecast.minCategory;
+                const isQuiet = !forecast.allEqual && slot.category === forecast.minCategory;
                 return (
                   <Box
                     key={slot.hour}
