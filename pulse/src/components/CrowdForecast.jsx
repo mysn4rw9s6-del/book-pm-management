@@ -97,6 +97,24 @@ function categoryForOccupancy(occupancy) {
 // State 6 — Invalid Data:
 //   Some slots contain negative occupancy values.
 // ---------------------------------------------------------------------------
+// Normal (non-test) forecast state — uses the standard simulated occupancy
+// data with no test overrides or guardrail triggers.
+const NORMAL_STATE = {
+  key: null,
+  label: 'Normal Forecast',
+  description: 'Default simulated occupancy forecast based on typical gym traffic patterns.',
+  dataAgeHours: 3,
+  days: {
+    mon: buildDay('mon'),
+    tue: buildDay('tue'),
+    wed: buildDay('wed'),
+    thu: buildDay('thu'),
+    fri: buildDay('fri'),
+    sat: buildDay('sat'),
+    sun: buildDay('sun'),
+  },
+};
+
 const TEST_STATES = [
   {
     key: 'happyPath',
@@ -269,11 +287,11 @@ function buildForecast(dayData, dataAgeHours) {
 // for evaluation (to be removed before student-facing release).
 // ---------------------------------------------------------------------------
 export default function CrowdForecast() {
-  const [stateKey, setStateKey] = useState(TEST_STATES[0].key);
+  const [stateKey, setStateKey] = useState(null);
   const [dayIdx, setDayIdx] = useState(0);
 
   const state = useMemo(
-    () => TEST_STATES.find((s) => s.key === stateKey) ?? TEST_STATES[0],
+    () => (stateKey ? (TEST_STATES.find((s) => s.key === stateKey) ?? NORMAL_STATE) : NORMAL_STATE),
     [stateKey]
   );
 
@@ -286,7 +304,7 @@ export default function CrowdForecast() {
   );
 
   const handleStateChange = (_, next) => {
-    if (next !== null) setStateKey(next);
+    setStateKey(next);
   };
 
   const handleDayChange = (_, next) => {
@@ -513,6 +531,29 @@ export default function CrowdForecast() {
             </ToggleButton>
           ))}
         </ToggleButtonGroup>
+        {stateKey !== null && (
+          <Box sx={{ mt: 1.5 }}>
+            <ToggleButton
+              value="reset"
+              onClick={() => setStateKey(null)}
+              size="small"
+              sx={{
+                fontSize: '0.7rem',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: '10px !important',
+                px: 2,
+                color: 'text.secondary',
+                '&:hover': {
+                  borderColor: tokens.violetBright,
+                  color: tokens.violetBright,
+                },
+              }}
+            >
+              Reset to Normal Forecast
+            </ToggleButton>
+          </Box>
+        )}
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, fontSize: '0.78rem' }}>
           {state.description}
         </Typography>
