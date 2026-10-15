@@ -188,6 +188,21 @@ const TEST_STATES = [
       sun: buildDay('sun'),
     },
   },
+  {
+    key: 'allHoursEqual',
+    label: '7 · All Hours Equal',
+    description: 'Every open hour is Medium. Observe how Best Times handles a day with no crowd-level differences.',
+    dataAgeHours: 2,
+    days: {
+      mon: buildDay('mon', () => 50),
+      tue: buildDay('tue', () => 50),
+      wed: buildDay('wed', () => 50),
+      thu: buildDay('thu', () => 50),
+      fri: buildDay('fri', () => 50),
+      sat: buildDay('sat', () => 50),
+      sun: buildDay('sun', () => 50),
+    },
+  },
 ];
 
 // Realistic-ish occupancy patterns for a university gym.
@@ -278,8 +293,21 @@ export default function CrowdForecast() {
       <Typography variant="h5" sx={{ fontSize: '1.2rem', mb: 0.5 }}>
         Crowd Forecast
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
         Tait McKenzie Fitness Centre — plan your visit around quieter times.
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{
+          display: 'block',
+          mb: 3,
+          color: 'text.secondary',
+          opacity: 0.7,
+          fontSize: '0.72rem',
+          fontStyle: 'italic',
+        }}
+      >
+        Demo forecast — simulated occupancy data, not live York University gym conditions.
       </Typography>
 
       {/* Day selector */}
