@@ -1,0 +1,9 @@
+{
+  "name": "pulse-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix pulse install && npm --prefix pulse run dev",
+    "build": "npm --prefix pulse install && npm --prefix pulse run build",
+    "preview": "npm --prefix pulse install && npm --prefix pulse run preview"
+  }
+}
